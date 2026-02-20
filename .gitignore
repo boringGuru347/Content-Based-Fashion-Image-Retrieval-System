@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+ml/
+env/
+
+# Data files
+*.pkl
+*.ann
+dataset/
+uploads/
+
+# OS files
+.DS_Store
+.bash_profile
+cuda-keyring_1.1-1_all.deb
+.idea
+.vscode
+fashion-dataset
+programfiles
