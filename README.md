@@ -7,6 +7,8 @@
 
 A content-based image retrieval system that recommends visually similar fashion items for any uploaded image. It leverages a pretrained **ResNet50** CNN to extract deep feature embeddings and uses **Approximate Nearest Neighbor (ANN)** search via **Annoy** for fast, scalable similarity lookup — all wrapped in an interactive **Streamlit** web application.
 
+Deployed at - (https://content-based-fashion-image-retrieval-system-2xnpmt5qhyy33gcke.streamlit.app/)
+
 ---
 
 ## 🔍 How It Works
