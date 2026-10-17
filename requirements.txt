@@ -5,3 +5,4 @@ scikit-learn==1.6.1
 pillow==10.4.0
 annoy==1.17.3
 tqdm==4.67.1
+pandas>=2.0.0

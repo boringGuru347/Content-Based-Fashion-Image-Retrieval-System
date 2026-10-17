@@ -14,15 +14,25 @@ from sklearn.neighbors import NearestNeighbors
 
 
 
-feature_list = np.array(pickle.load(open('embeddings.pkl', 'rb')))
-filenames = pickle.load(open('filenames.pkl', 'rb'))
-model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-model.trainable = False
+with open('filenames.pkl', 'rb') as f:
+    filenames = pickle.load(f)
 
-model = tf.keras.Sequential([
-    model,
-    GlobalMaxPool2D(),
-])
+@st.cache_resource
+def load_model():
+    base_model = ResNet50(weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+    base_model.trainable = False
+    return tf.keras.Sequential([
+        base_model,
+        GlobalMaxPool2D(),
+    ])
+
+@st.cache_resource
+def load_annoy_index():
+    u = AnnoyIndex(2048, 'euclidean')
+    u.load('fashion.ann')
+    return u
+
+model = load_model()
 
 # u = AnnoyIndex(len(feature_list[0]), 'euclidean')
 # for i in range(len(feature_list)):
@@ -32,56 +42,34 @@ model = tf.keras.Sequential([
 
 st.title('Fashion Recommender System')
 
-def save_uploaded_file(uploaded_file):
-    try:
-        with open(os.path.join('uploads', uploaded_file.name), 'wb') as f:
-            f.write(uploaded_file.getbuffer())
-        return 1
-    except:
-        return 0
-
-def feature_extraction(img_path, model):
-    img = image.load_img(img_path, target_size=(224, 224))
+def feature_extraction(img_file, model):
+    img = Image.open(img_file).convert('RGB').resize((224, 224))
     img_array = image.img_to_array(img)
     expanded_img_array = np.expand_dims(img_array, axis=0)
     preprocessed_img = preprocess_input(expanded_img_array)
-    result = model.predict(preprocessed_img).flatten()
+    result = model.predict(preprocessed_img, verbose=0).flatten()
     normalized_result = result / np.linalg.norm(result)
     return normalized_result
 
-def recommend(img_features, features_list):
-    u = AnnoyIndex(2048, 'euclidean')
-    u.load('fashion.ann')
-    indices1 = u.get_nns_by_vector(img_features, 5)
-    return indices1
+def recommend(img_features):
+    u = load_annoy_index()
+    indices1, distances = u.get_nns_by_vector(img_features, 5, include_distances=True)
+    scores = [max(0.0, 1.0 - (d ** 2) / 2.0) * 100.0 for d in distances]
+    return indices1, scores
 
 upload_img = st.file_uploader('Choose an image')
 
 if upload_img is not None:
-    if save_uploaded_file(upload_img):
-        display_img = Image.open(upload_img)
-        st.image(display_img)
-        features = feature_extraction(os.path.join('uploads', upload_img.name), model)
-        # print(features)
-        # st.text(features)
-        indices = recommend(features, feature_list)
-        col1, col2, col3, col4, col5 = st.columns(5)
-        with col1:
-            st.image(filenames[indices[0]])
-
-        with col2:
-            st.image(filenames[indices[1]])
-
-        with col3:
-            st.image(filenames[indices[2]])
-
-        with col4:
-            st.image(filenames[indices[3]])
-
-        with col5:
-            st.image(filenames[indices[4]])
-
-        # with col5:
-        #     st.image(filenames[indices[0][0]])
-    else:
-        st.header('Some error occurred in file upload')
+    display_img = Image.open(upload_img)
+    st.image(display_img)
+    features = feature_extraction(upload_img, model)
+    indices, scores = recommend(features)
+    cols = st.columns(5)
+    for col, idx, score in zip(cols, indices, scores):
+        with col:
+            img_path = filenames[idx]
+            if os.path.exists(img_path):
+                st.image(img_path, use_container_width=True)
+            else:
+                st.warning(f"Image missing:\n`{os.path.basename(img_path)}`")
+            st.caption(f"🎯 **{score:.1f}% Match**")

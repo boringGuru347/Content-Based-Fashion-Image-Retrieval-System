@@ -1,23 +1,26 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
 
 # Virtual environments
 venv/
-ml/
+.venv/
 env/
+ml/
 
-# Data files
-*.pkl
-*.ann
+# Large Datasets
+fashion-dataset/
 dataset/
-uploads/
 
-# OS files
+# Uploads directory (ignore temporary uploads)
+uploads/*
+!uploads/*.jpg
+
+# IDE & OS metadata
+.idea/
+.vscode/
 .DS_Store
+Thumbs.db
+*.deb
 .bash_profile
-cuda-keyring_1.1-1_all.deb
-.idea
-.vscode
-fashion-dataset
-programfiles
+programfiles/
