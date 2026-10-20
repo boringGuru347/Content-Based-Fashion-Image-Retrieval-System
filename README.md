@@ -9,8 +9,6 @@
 
 A high-performance Content-Based Image Retrieval (CBIR) system that recommends visually similar fashion products for any uploaded image. It leverages a pretrained **ResNet50** CNN to extract deep visual embeddings and uses **Approximate Nearest Neighbor (ANN)** search via Spotify's **Annoy** for sub-100ms similarity lookup — all delivered through an interactive **Streamlit** web application with confidence scoring and an empirical Information Retrieval evaluation suite.
 
-Live Demo: [Streamlit Cloud](https://content-based-fashion-image-retrieval-system-2xnpmt5qhyy33gcke.streamlit.app/)
-
 ---
 
 ## 🔍 How It Works
